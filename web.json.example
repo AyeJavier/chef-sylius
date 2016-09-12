@@ -1,0 +1,11 @@
+{
+   "bd":{
+      "clave-acceso":""
+   },
+   "aplicativo":{
+      "nombre":""
+   },
+   "run_list":[
+      "recipe[phpapp]"
+   ]
+}
