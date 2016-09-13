@@ -300,11 +300,20 @@ service "apache2" do
   action :enable
   subscribes :restart,"modulo rewrite" , :immediately
 end
-execute 'mcryp' do
-    command  "php5enmod mcrypt "
-    user  "root" 
-    action  :run
+
+package "php-mcrypt"  do 
+  action :install
 end
+# execute 'mcryp' do
+#     command  "php5enmod mcrypt "
+#     user  "root" 
+#     action  :run
+# end
+# execute 'install mcrypt ' do
+#     command  "yum install php-mcrypt"
+#     user  "root" 
+#     action  :run
+# end
 package ["phpmyadmin"]  do
   action :install
 end
@@ -321,24 +330,53 @@ template ("/usr/share/phpMyAdmin/.htaccess") do
  mode 0755
 end
 
+cookbook_file '/tmp/create_tables.sql' do
+  source 'create_tables.sql'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  not_if { File.exist?("/tmp/create_tables.sql") }
+  action :create
+end
+pass = node['bd']['clave-acceso']
 execute 'crea bd phpmyadmin  ' do
-    command  " mysql -u root -pqwerty -h 127.0.0.1 < /vagrant/create_tables.sql "
+    command  " mysql -u root -p#{pass} -h 127.0.0.1 < /tmp/create_tables.sql "
     user  "root"
     #ignore_failure true
     #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
     action  :run
 end
+cookbook_file '/tmp/user_pma.sql' do
+  source 'user_pma.sql'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  not_if { File.exist?("/tmp/user_pma.sql") }
+  action :create
+end
+pass = node['bd']['clave-acceso']
+template ("/tmp/user_pma.sql") do
+ source ("user_pma.sql.erb")
+ owner "root"
+ group "root"
+ mode 0750
+ variables(server: "localhost",clave: pass)
+ #verify 'file /var/#{nombre_aplicativo} |grep ": directory" '
+end
+pass = node['bd']['clave-acceso']
 execute 'crea crea usuario pma y accesos a phpmyadmin (BD)' do
-    command  " mysql -u root -pqwerty -h 127.0.0.1 < /vagrant/user_pma.sql "
+    command  " mysql -u root -p#{pass} -h 127.0.0.1 < /tmp/user_pma.sql "
     user  "root"
     #ignore_failure true
     #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
-    not_if 'mysql -uroot -pqwerty -h 127.0.0.1 -e"SELECT User FROM mysql.user;" |grep pma'
+    not_if 'mysql -uroot -p#{pass} -h 127.0.0.1 -e"SELECT User FROM mysql.user;" |grep pma'
     action  :run
 end
+pass = node['bd']['clave-acceso']
 template ("/etc/phpMyAdmin/config-db.php") do
  source ("config-db.php.erb")
  owner "root"
  group "apache"
- mode 640
+ variables(clave: pass)
+ mode 0640
 end
