@@ -7,4 +7,5 @@
 .chef/encrypted_data_bag_secret
 cache/*
 local-mode-cache/*
+nodes/*
 web.json
