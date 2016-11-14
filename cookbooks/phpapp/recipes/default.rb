@@ -17,9 +17,7 @@
 # #include_recipe "php"
  include_recipe "apache2::mod_php5"
 #recipe[selinux::disabled]
-package ["npm"]  do
-  action :install
-end
+
 
 package ["git"]  do
   action :install
@@ -307,6 +305,9 @@ end
 package "php-mcrypt"  do 
   action :install
 end
+package ["npm"]  do
+  action :install
+end
 # execute 'mcryp' do
 #     command  "php5enmod mcrypt "
 #     user  "root" 
@@ -317,69 +318,69 @@ end
 #     user  "root" 
 #     action  :run
 # end
-package ["phpmyadmin"]  do
-  action :install
-end
-service "apache2" do
-  supports :restart => true
-  action :enable
-  subscribes :restart,"package[phpmyadmin]" , :immediately
-end
+# package ["phpmyadmin"]  do
+#   action :install
+# end
+# service "apache2" do
+#   supports :restart => true
+#   action :enable
+#   subscribes :restart,"package[phpmyadmin]" , :immediately
+# end
 
-template ("/usr/share/phpMyAdmin/.htaccess") do
- source (".htaccess.erb")
- owner "root"
- group "root"
- mode 0755
-end
+# template ("/usr/share/phpMyAdmin/.htaccess") do
+#  source (".htaccess.erb")
+#  owner "root"
+#  group "root"
+#  mode 0755
+# end
 
-cookbook_file '/tmp/create_tables.sql' do
-  source 'create_tables.sql'
-  owner 'root'
-  group 'root'
-  mode '0755'
-  not_if { File.exist?("/tmp/create_tables.sql") }
-  action :create
-end
-pass = node['bd']['clave-acceso']
-execute 'crea bd phpmyadmin  ' do
-    command  " mysql -u root -p#{pass} -h 127.0.0.1 < /tmp/create_tables.sql "
-    user  "root"
-    #ignore_failure true
-    #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
-    action  :run
-end
-cookbook_file '/tmp/user_pma.sql' do
-  source 'user_pma.sql'
-  owner 'root'
-  group 'root'
-  mode '0755'
-  not_if { File.exist?("/tmp/user_pma.sql") }
-  action :create
-end
-pass = node['bd']['clave-acceso']
-template ("/tmp/user_pma.sql") do
- source ("user_pma.sql.erb")
- owner "root"
- group "root"
- mode 0750
- variables(server: "localhost",clave: pass)
- #verify 'file /var/#{nombre_aplicativo} |grep ": directory" '
-end
-pass = node['bd']['clave-acceso']
-execute 'crea crea usuario pma y accesos a phpmyadmin (BD)' do
-    command  " mysql -u root -p#{pass} -h 127.0.0.1 < /tmp/user_pma.sql "
-    user  "root"
-    #ignore_failure true
-    #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
-    not_if 'mysql -uroot -p#{pass} -h 127.0.0.1 -e"SELECT User FROM mysql.user;" |grep pma'
-    action  :run
-end
-pass = node['bd']['clave-acceso']
-template ("/etc/phpMyAdmin/config-db.php") do
- source ("config-db.php.erb")
- owner "root"
- group "apache"
- variables(clave: pass)
- mode 0640
-end
+# cookbook_file '/tmp/create_tables.sql' do
+#   source 'create_tables.sql'
+#   owner 'root'
+#   group 'root'
+#   mode '0755'
+#   not_if { File.exist?("/tmp/create_tables.sql") }
+#   action :create
+# end
+# pass = node['bd']['clave-acceso']
+# execute 'crea bd phpmyadmin  ' do
+#     command  " mysql -u root -p#{pass} -h 127.0.0.1 < /tmp/create_tables.sql "
+#     user  "root"
+#     #ignore_failure true
+#     #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
+#     action  :run
+# end
+# cookbook_file '/tmp/user_pma.sql' do
+#   source 'user_pma.sql'
+#   owner 'root'
+#   group 'root'
+#   mode '0755'
+#   not_if { File.exist?("/tmp/user_pma.sql") }
+#   action :create
+# end
+# pass = node['bd']['clave-acceso']
+# template ("/tmp/user_pma.sql") do
+#  source ("user_pma.sql.erb")
+#  owner "root"
+#  group "root"
+#  mode 0750
+#  variables(server: "localhost",clave: pass)
+#  #verify 'file /var/#{nombre_aplicativo} |grep ": directory" '
+# end
+# pass = node['bd']['clave-acceso']
+# execute 'crea crea usuario pma y accesos a phpmyadmin (BD)' do
+#     command  " mysql -u root -p#{pass} -h 127.0.0.1 < /tmp/user_pma.sql "
+#     user  "root"
+#     #ignore_failure true
+#     #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
+#     not_if 'mysql -uroot -p#{pass} -h 127.0.0.1 -e"SELECT User FROM mysql.user;" |grep pma'
+#     action  :run
+# end
+# pass = node['bd']['clave-acceso']
+# template ("/etc/phpMyAdmin/config-db.php") do
+#  source ("config-db.php.erb")
+#  owner "root"
+#  group "apache"
+#  variables(clave: pass)
+#  mode 0640
+# end
