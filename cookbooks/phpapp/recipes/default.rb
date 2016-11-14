@@ -117,14 +117,15 @@ execute 'instalando rpm latest' do
   command  "yum -y localinstall /tmp/latest.rpm"
   user  "root"
   group "root"
-  not_if { File.exist?("/etc/yum.repos.d/latest.repo") }
+  #not_if { File.exist?("/etc/yum.repos.d/latest.repo") }
+  not_if { File.exist?("/etc/yum.repos.d/webtatic.repo") }
   action  :run
 end
-
+pass = node['bd']['clave-acceso']
 mysql_service "default" do
   port '3306'
   version '5.7'
-  initial_root_password 'qwerty'
+  initial_root_password "#{pass}"
   #package_version '5.6.32-1ubuntu14.04'
   #package_version "5.6.31-0ubuntu0.14.04.2"
   #package_version "5.5.50-0ubuntu0.14.04.1"
@@ -292,7 +293,7 @@ execute 'modulo rewrite' do
     user  "root"
     #ignore_failure true
     #not_if { File.exist?("etc/apache2/conf-enabled/phpmyadmin.conf") }
-    #not_if 'mysql -uroot -pqwerty -e"SELECT User FROM mysql.user;" |grep pma'
+    
     action  :run
 end
 service "apache2" do
