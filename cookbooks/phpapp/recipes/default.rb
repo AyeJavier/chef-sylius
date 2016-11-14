@@ -16,6 +16,19 @@
  include_recipe "apache2::default"
 # #include_recipe "php"
  include_recipe "apache2::mod_php5"
+#recipe[selinux::disabled]
+package ["npm"]  do
+  action :install
+end
+
+package ["git"]  do
+  action :install
+end
+
+package ["mercurial"]  do
+  action :install
+end
+
 
 template ("/etc/hosts") do
  source ("hosts.erb")
@@ -211,17 +224,6 @@ service "apache2" do
   subscribes :reload,"package[php-process]" , :immediately
 end
 
-package ["npm"]  do
-  action :install
-end
-
-package ["git"]  do
-  action :install
-end
-
-package ["mercurial"]  do
-  action :install
-end
 #package ["apache2-utils"]  do
 #  action :install
 #end
