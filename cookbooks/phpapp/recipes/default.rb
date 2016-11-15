@@ -132,6 +132,9 @@ execute 'instalando rpm latest' do
   not_if { File.exist?("/etc/yum.repos.d/webtatic.repo") }
   action  :run
 end
+mysql_client 'default' do
+  action :create
+end
 pass = node['bd']['clave-acceso']
 mysql_service "default" do
   port '3306'
@@ -146,14 +149,14 @@ end
 package "php"  do
   action :install
 end
-package "php-mysql"  do 
-  action :install
-end
-service "apache2" do
-  supports :restart => true
-  action :start
-  subscribes :reload,"package[php-mysql]" , :immediately
-end
+# package "php-mysql"  do 
+#   action :install
+# end
+#service "apache2" do
+#  supports :restart => true
+#  action :start
+#  subscribes :reload,"package[php-mysql]" , :immediately
+#end
 service "apache2" do
   supports :restart => true
   action :start
