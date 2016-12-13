@@ -68,7 +68,10 @@ yum_package 'ca-certificates' do
   #options "--disablerepo=epel"
 end
 
-
+yum_package 'nano' do
+  action :install
+  #options "--disablerepo=epel"
+end
 cookbook_file '/tmp/mysql57-community-release-el6-8.noarch.rpm' do
   source 'mysql57-community-release-el6-8.noarch.rpm'
   owner 'root'
@@ -224,7 +227,22 @@ service "apache2" do
   action :start
   subscribes :reload,"package[php-process]" , :immediately
 end
-
+package "php-pdo"  do 
+  action :install
+end
+service "apache2" do
+  supports :restart => true
+  action :start
+  subscribes :reload,"package[php-pdo]" , :immediately
+end
+package "php-mysql"  do 
+  action :install
+end
+service "apache2" do
+  supports :restart => true
+  action :start
+  subscribes :reload,"package[php-mysql]" , :immediately
+end
 #package ["apache2-utils"]  do
 #  action :install
 #end
