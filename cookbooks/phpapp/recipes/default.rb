@@ -334,11 +334,7 @@ end
 #     user  "root" 
 #     action  :run
 # end
-# execute 'install mcrypt ' do
-#     command  "yum install php-mcrypt"
-#     user  "root" 
-#     action  :run
-# end
+
 # package ["phpmyadmin"]  do
 #   action :install
 # end

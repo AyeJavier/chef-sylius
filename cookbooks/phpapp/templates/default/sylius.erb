@@ -4,9 +4,16 @@
 
     DocumentRoot /usr/app/<%=@aplicativo%>/web
     <Directory /usr/app/<%=@aplicativo%>/web>
-        AllowOverride None
-        Order Allow,Deny
-        Allow from All
+        #AllowOverride None
+        #Order Allow,Deny
+        #Allow from All
+        
+        #Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+        # DirectoryIndex index.html
+        Require all granted
 
         #<IfModule mod_rewrite.c>
         #    Options -MultiViews
